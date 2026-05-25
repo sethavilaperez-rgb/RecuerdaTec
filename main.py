@@ -1,7 +1,6 @@
 """
 RecuerdaTec - Aplicación de gestión de tareas y recordatorios.
 
-Proyecto de Tópicos Avanzados de Programación.
 Tecnologías: Python, POO, Tkinter, Pandas, Matplotlib, CSV.
 
 Para ejecutar:

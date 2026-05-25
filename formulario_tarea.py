@@ -158,11 +158,16 @@ class FormularioTarea:
         self.combo_repetir.grid(row=fila, column=1, pady=4)
         fila += 1
 
-        self.var_completada = tk.BooleanVar(value=False)
-        tk.Checkbutton(
-            marco, text="Tarea completada", variable=self.var_completada
-        ).grid(row=fila, column=1, sticky="w", pady=4)
-        fila += 1
+        if self.modo == 'editar':
+            tk.Label(marco, text="Estado:").grid(row=fila, column=0, sticky="w", pady=4)
+            self.combo_estado = ttk.Combobox(
+                marco, values=Tarea.ESTADOS, state="readonly", width=30
+            )
+            self.combo_estado.current(0)
+            self.combo_estado.grid(row=fila, column=1, pady=4)
+            fila += 1
+        else:
+            self.combo_estado = None
 
         self.var_recordatorio = tk.BooleanVar(value=True)
         tk.Checkbutton(
@@ -183,7 +188,7 @@ class FormularioTarea:
         if self.modo == 'editar':
             tk.Button(
                 marco_btn, text="Eliminar", width=10,
-                bg="#e74c3c", fg="white",
+                bg=self.tema['boton_peligro'], fg=self.tema['boton_texto'],
                 command=self._eliminar
             ).pack(side=tk.LEFT, padx=4)
 
@@ -297,7 +302,8 @@ class FormularioTarea:
         if tarea.repetir in Tarea.TIPOS_REPETICION:
             self.combo_repetir.current(Tarea.TIPOS_REPETICION.index(tarea.repetir))
 
-        self.var_completada.set(tarea.completada)
+        if self.combo_estado and tarea.estado in Tarea.ESTADOS:
+            self.combo_estado.current(Tarea.ESTADOS.index(tarea.estado))
         self.var_recordatorio.set(tarea.recordatorio)
         self._actualizar_color_prioridad()
 
@@ -353,7 +359,7 @@ class FormularioTarea:
             'hora_fin': self._obtener_hora_fin(),
             'categoria': self.combo_categoria.get(),
             'prioridad': self.combo_prioridad.get(),
-            'completada': self.var_completada.get(),
+            'estado': self.combo_estado.get() if self.combo_estado else 'Pendiente',
             'recordatorio': self.var_recordatorio.get(),
             'repetir': self.combo_repetir.get()
         }

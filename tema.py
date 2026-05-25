@@ -1,58 +1,64 @@
 """
 Módulo de temas visuales (claro y oscuro).
-Centraliza los colores para aplicar modo oscuro fácilmente.
+Paleta unificada en escala gris, azul y blanco.
 """
 
 
 TEMA_CLARO = {
     'nombre': 'claro',
-    'fondo': '#f0f4f8',
+    'fondo': '#e8eef4',
     'panel': '#ffffff',
-    'texto': '#2c3e50',
-    'texto_secundario': '#7f8c8d',
-    'boton': '#4a90d9',
+    'texto': '#2d3e50',
+    'texto_secundario': '#6b7c93',
+    'boton': '#4a6fa5',
+    'boton_secundario': '#6b8cae',
+    'boton_peligro': '#5a6b7d',
     'boton_texto': '#ffffff',
     'entrada_bg': '#ffffff',
-    'entrada_fg': '#2c3e50',
-    'grafica_fondo': '#f0f4f8',
-    'grafica_ejes': '#2c3e50',
+    'entrada_fg': '#2d3e50',
+    'resumen_bg': '#f4f7fb',
+    'borde': '#c5d0dc',
+    'grafica_fondo': '#e8eef4',
+    'grafica_ejes': '#2d3e50',
+    'grafica_colores': ['#4a6fa5', '#6b8cae', '#9bb3d1', '#b8c9e0'],
     'prioridad': {
-        'Alta': '#ffcccc',
-        'Media': '#fff3cd',
-        'Baja': '#cce5ff'
+        'Alta': '#9bb3d1',
+        'Media': '#c5d4e3',
+        'Baja': '#e8eef4'
     },
-    'semana_hoy': '#d4edda',
+    'semana_hoy': '#c5d4e3',
     'semana_celda': '#ffffff'
 }
 
 TEMA_OSCURO = {
     'nombre': 'oscuro',
-    'fondo': '#1a1a2e',
-    'panel': '#16213e',
-    'texto': '#eaeaea',
-    'texto_secundario': '#a0a0b0',
-    'boton': '#4a90d9',
+    'fondo': '#1e2a38',
+    'panel': '#2a3a4d',
+    'texto': '#e8eef4',
+    'texto_secundario': '#9bb3d1',
+    'boton': '#5a7eb5',
+    'boton_secundario': '#4a6a8a',
+    'boton_peligro': '#4a5568',
     'boton_texto': '#ffffff',
-    'entrada_bg': '#0f3460',
-    'entrada_fg': '#eaeaea',
-    'grafica_fondo': '#1a1a2e',
-    'grafica_ejes': '#eaeaea',
+    'entrada_bg': '#354a5f',
+    'entrada_fg': '#e8eef4',
+    'resumen_bg': '#354a5f',
+    'borde': '#4a6a8a',
+    'grafica_fondo': '#1e2a38',
+    'grafica_ejes': '#e8eef4',
+    'grafica_colores': ['#5a7eb5', '#6b8cae', '#4a6a8a', '#9bb3d1'],
     'prioridad': {
-        'Alta': '#5c2a2a',
-        'Media': '#5c4a1a',
-        'Baja': '#1a3a5c'
+        'Alta': '#4a6a8a',
+        'Media': '#354a5f',
+        'Baja': '#2a3a4d'
     },
-    'semana_hoy': '#1a4d3a',
-    'semana_celda': '#0f3460'
+    'semana_hoy': '#4a6a8a',
+    'semana_celda': '#354a5f'
 }
 
 
 def obtener_tema(modo_oscuro=False):
-    """
-    Devuelve el diccionario de colores según el modo elegido.
-
-    :param modo_oscuro: True para tema oscuro, False para claro
-    """
+    """Devuelve el diccionario de colores según el modo elegido."""
     if modo_oscuro:
         return TEMA_OSCURO.copy()
     return TEMA_CLARO.copy()

@@ -14,14 +14,12 @@ class Tarea:
 
     CATEGORIAS = ['Escuela', 'Trabajo', 'Personal', 'Otro']
     TIPOS_REPETICION = ['Ninguna', 'Diaria', 'Semanal', 'Mensual']
+    ESTADOS = ['Pendiente', 'Completada', 'Fallida']
 
     def __init__(self, id_tarea, titulo, descripcion, fecha_inicio, prioridad,
                  fecha_fin='', hora_inicio='', hora_fin='', categoria='Personal',
-                 completada=False, recordatorio=True, repetir='Ninguna',
+                 estado='Pendiente', recordatorio=True, repetir='Ninguna',
                  fecha_completada=''):
-        """
-        Inicializa una tarea con todos sus atributos.
-        """
         self.id_tarea = id_tarea
         self.titulo = titulo
         self.descripcion = descripcion
@@ -31,26 +29,33 @@ class Tarea:
         self.hora_fin = hora_fin if hora_fin else ''
         self.categoria = categoria if categoria else 'Personal'
         self.prioridad = prioridad
-        self.completada = completada
+        self.estado = estado if estado in self.ESTADOS else 'Pendiente'
         self.recordatorio = recordatorio
         self.repetir = repetir if repetir else 'Ninguna'
         self.fecha_completada = fecha_completada if fecha_completada else ''
 
+    @property
+    def completada(self):
+        """Compatibilidad con código que usaba el booleano completada."""
+        return self.estado == 'Completada'
+
+    @property
+    def es_pendiente(self):
+        return self.estado == 'Pendiente'
+
     def marcar_completada(self):
-        """Cambia el estado de la tarea a completada y guarda la fecha."""
-        self.completada = True
+        self.estado = 'Completada'
         self.fecha_completada = datetime.now().strftime('%Y-%m-%d')
 
     def marcar_pendiente(self):
-        """Cambia el estado de la tarea a pendiente."""
-        self.completada = False
+        self.estado = 'Pendiente'
         self.fecha_completada = ''
 
+    def marcar_fallida(self):
+        self.estado = 'Fallida'
+        self.fecha_completada = datetime.now().strftime('%Y-%m-%d')
+
     def obtener_fecha_fin_efectiva(self):
-        """
-        Si no hay fecha de término, usamos la de inicio.
-        Para tareas repetitivas sin fin, usamos un límite lejano.
-        """
         if self.fecha_fin and str(self.fecha_fin).strip():
             return str(self.fecha_fin)
         if self.repetir != 'Ninguna':
@@ -58,39 +63,29 @@ class Tarea:
         return self.fecha_inicio
 
     def esta_activa_en_fecha(self, fecha):
-        """
-        Indica si la tarea debe mostrarse en una fecha del calendario.
-        Soporta rangos y tareas repetitivas.
-        """
+        if not self.es_pendiente:
+            return False
         if fecha < self.fecha_inicio:
             return False
-
         fin = self.obtener_fecha_fin_efectiva()
         if fecha > fin:
             return False
-
         if self.repetir == 'Ninguna':
             return True
-
         try:
             f = datetime.strptime(fecha, '%Y-%m-%d')
             inicio = datetime.strptime(self.fecha_inicio, '%Y-%m-%d')
         except ValueError:
             return False
-
         if self.repetir == 'Diaria':
             return True
-
         if self.repetir == 'Semanal':
             return f.weekday() == inicio.weekday()
-
         if self.repetir == 'Mensual':
             return f.day == inicio.day
-
         return True
 
     def obtener_horario_texto(self):
-        """Texto corto con el horario de la tarea."""
         if self.hora_inicio and self.hora_fin:
             return f"{self.hora_inicio} - {self.hora_fin}"
         if self.hora_inicio:
@@ -100,7 +95,6 @@ class Tarea:
         return ''
 
     def a_dict(self):
-        """Convierte la tarea a un diccionario para Pandas."""
         return {
             'id': self.id_tarea,
             'titulo': self.titulo,
@@ -111,7 +105,7 @@ class Tarea:
             'hora_fin': self.hora_fin,
             'categoria': self.categoria,
             'prioridad': self.prioridad,
-            'completada': self.completada,
+            'estado': self.estado,
             'recordatorio': self.recordatorio,
             'repetir': self.repetir,
             'fecha_completada': self.fecha_completada
@@ -119,7 +113,6 @@ class Tarea:
 
     @staticmethod
     def desde_fila(fila):
-        """Crea un objeto Tarea a partir de una fila del DataFrame."""
         if 'fecha_inicio' in fila.index:
             fecha_inicio = str(fila['fecha_inicio'])
         else:
@@ -128,6 +121,14 @@ class Tarea:
         fecha_fin = ''
         if 'fecha_fin' in fila.index and pd_no_es_vacio(fila['fecha_fin']):
             fecha_fin = str(fila['fecha_fin'])
+
+        # Migrar columna antigua completada -> estado
+        if 'estado' in fila.index and pd_no_es_vacio(fila['estado']):
+            estado = str(fila['estado'])
+        elif bool(fila.get('completada', False)):
+            estado = 'Completada'
+        else:
+            estado = 'Pendiente'
 
         return Tarea(
             id_tarea=int(fila['id']),
@@ -139,21 +140,19 @@ class Tarea:
             hora_fin=str(fila.get('hora_fin', '') or ''),
             categoria=str(fila.get('categoria', 'Personal') or 'Personal'),
             prioridad=str(fila['prioridad']),
-            completada=bool(fila['completada']),
+            estado=estado,
             recordatorio=bool(fila['recordatorio']),
             repetir=str(fila.get('repetir', 'Ninguna') or 'Ninguna'),
             fecha_completada=str(fila.get('fecha_completada', '') or '')
         )
 
     def __str__(self):
-        estado = "Completada" if self.completada else "Pendiente"
         extra = f" [{self.categoria}]" if self.categoria else ''
-        rep = f" ↻{self.repetir}" if self.repetir != 'Ninguna' else ''
-        return f"[{self.id_tarea}] {self.titulo}{extra}{rep} ({estado})"
+        rep = f" (rep. {self.repetir})" if self.repetir != 'Ninguna' else ''
+        return f"[{self.id_tarea}] {self.titulo}{extra}{rep} ({self.estado})"
 
 
 def pd_no_es_vacio(valor):
-    """Revisa si un valor de Pandas no está vacío (evita NaN)."""
     if valor is None:
         return False
     texto = str(valor).strip()
@@ -161,10 +160,6 @@ def pd_no_es_vacio(valor):
 
 
 def validar_hora(hora, nombre_campo, obligatoria=False):
-    """
-    Valida formato de hora HH:MM (24 horas).
-    :return: hora validada, None si hay error, '' si opcional vacía
-    """
     hora = hora.strip()
     if not hora:
         if obligatoria:
