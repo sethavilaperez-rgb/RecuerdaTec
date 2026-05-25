@@ -1,6 +1,1 @@
 id,titulo,descripcion,fecha_inicio,fecha_fin,hora_inicio,hora_fin,categoria,prioridad,estado,recordatorio,repetir,fecha_completada
-1,Preparar exposición,Hacer la presentación de topicos,2026-05-25,2026-05-26,,,Personal,Alta,Pendiente,True,Ninguna,
-2,Actualizar CV,"Cambiar la foto
-Agregar experiencia en proyectos
-Reducirlo",2026-05-25,2026-05-29,,,Personal,Media,Pendiente,True,Ninguna,
-3,Preparar proyecto de IA,Preparar presentación y estudiar el código,2026-05-29,,,,Personal,Media,Pendiente,True,Ninguna,
