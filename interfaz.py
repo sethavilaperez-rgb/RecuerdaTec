@@ -34,6 +34,8 @@ class InterfazRecuerdaTec:
         self.var_filtro_fecha = tk.BooleanVar(value=False)
         self.filtro_historial = tk.StringVar(value="Completada")
         self.botones_tema = []  # Botones que reciben colores del tema
+        self.resumen_expandido = True
+        self.resumen_titulo_actual = ""
 
         self._crear_widgets()
         self._configurar_colores_tablas()
@@ -149,6 +151,23 @@ class InterfazRecuerdaTec:
             font=("Segoe UI", 9, "bold"), padx=8, pady=6
         )
         self.marco_resumen.pack(fill=tk.X, pady=4)
+
+        # Cabecera con minimizar/restaurar el resumen
+        self.marco_resumen_cabecera = tk.Frame(self.marco_resumen)
+        self.marco_resumen_cabecera.pack(fill=tk.X, padx=4, pady=(2, 0))
+
+        self.lbl_resumen_min = tk.Label(
+            self.marco_resumen_cabecera, text="",
+            font=("Segoe UI", 9), anchor="w"
+        )
+        self.lbl_resumen_min.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        self.btn_toggle_resumen = tk.Button(
+            self.marco_resumen_cabecera, text="Minimizar",
+            command=self._alternar_resumen
+        )
+        self.btn_toggle_resumen.pack(side=tk.RIGHT, padx=4)
+        self._registrar_boton(self.btn_toggle_resumen, 'secundario')
 
         self.contenedor_resumen = tk.Frame(self.marco_resumen)
         self.contenedor_resumen.pack(fill=tk.X, padx=4, pady=4)
@@ -376,6 +395,22 @@ class InterfazRecuerdaTec:
 
     # ---------- Resumen de tarea ----------
 
+    def _alternar_resumen(self):
+        """Oculta o muestra el contenido del resumen para liberar espacio."""
+        if self.resumen_expandido:
+            self.resumen_expandido = False
+            self.contenedor_resumen.pack_forget()
+            texto = self.resumen_titulo_actual.strip()
+            self.lbl_resumen_min.config(
+                text=f"Resumen minimizado: {texto}" if texto else "Resumen minimizado"
+            )
+            self.btn_toggle_resumen.config(text="Mostrar resumen")
+        else:
+            self.resumen_expandido = True
+            self.contenedor_resumen.pack(fill=tk.X, padx=4, pady=4)
+            self.lbl_resumen_min.config(text="")
+            self.btn_toggle_resumen.config(text="Minimizar")
+
     def _limpiar_contenedor_resumen(self):
         """Quita los widgets del resumen para volver a dibujarlos."""
         for widget in self.contenedor_resumen.winfo_children():
@@ -423,12 +458,15 @@ class InterfazRecuerdaTec:
     def _mostrar_resumen_vacio(self):
         self._limpiar_contenedor_resumen()
         t = self.tema
+        self.resumen_titulo_actual = ""
         self.contenedor_resumen.configure(bg=t['resumen_bg'])
         tk.Label(
             self.contenedor_resumen,
             text="Selecciona una tarea con 1 clic para ver su informacion.",
             font=("Segoe UI", 9), fg=t['texto'], bg=t['resumen_bg'], anchor="w"
         ).pack(fill=tk.X, padx=4, pady=2)
+        if not self.resumen_expandido:
+            self.lbl_resumen_min.config(text="Resumen minimizado")
 
     def _mostrar_resumen_tarea(self, tarea):
         """Resumen horizontal: datos a la izquierda, descripcion a la derecha."""
@@ -437,6 +475,12 @@ class InterfazRecuerdaTec:
         self.contenedor_resumen.configure(bg=t['resumen_bg'])
         self.contenedor_resumen.grid_columnconfigure(1, weight=1)
         self.contenedor_resumen.grid_rowconfigure(1, weight=1)
+        self.resumen_titulo_actual = tarea.titulo or ""
+        if not self.resumen_expandido:
+            titulo = self.resumen_titulo_actual.strip()
+            self.lbl_resumen_min.config(
+                text=f"Resumen minimizado: {titulo[:60]}" if titulo else "Resumen minimizado"
+            )
 
         tk.Label(
             self.contenedor_resumen, text=tarea.titulo,
@@ -684,9 +728,11 @@ class InterfazRecuerdaTec:
             marco.configure(bg=t['panel'], fg=t['texto'])
         self.marco_filtros.configure(bg=t['panel'])
         self.marco_resumen.configure(bg=t['panel'], fg=t['texto'])
+        self.marco_resumen_cabecera.configure(bg=t['panel'])
         self.marco_acciones.configure(bg=t['panel'])
         self.marco_leyenda.configure(bg=t['panel'])
         self.lbl_leyenda.configure(bg=t['panel'], fg=t['texto'])
+        self.lbl_resumen_min.configure(bg=t['panel'], fg=t['texto_secundario'])
         self.contenedor_resumen.configure(bg=t['resumen_bg'])
         self.lbl_num_cal.configure(bg=t['panel'], fg=t['texto_secundario'])
         self.check_filtro_fecha.configure(bg=t['panel'], fg=t['texto'], selectcolor=t['panel'])

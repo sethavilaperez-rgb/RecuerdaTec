@@ -1,1 +1,5 @@
 id,titulo,descripcion,fecha_inicio,fecha_fin,hora_inicio,hora_fin,categoria,prioridad,estado,recordatorio,repetir,fecha_completada
+1,Exposición,"Preparar presentación de exposición 
+de Topicos",2026-05-26,,,,Escuela,Alta,Pendiente,True,Ninguna,
+2,Actualizar CV,Agregar experiencia en proyectos,2026-05-29,2026-05-30,,,Personal,Media,Pendiente,True,Ninguna,
+3,Automatas,Preparas material,2026-05-28,,,,Personal,Media,Completada,True,Ninguna,2026-05-26

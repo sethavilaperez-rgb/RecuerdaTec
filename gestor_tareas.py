@@ -61,6 +61,11 @@ class GestorTareas:
                 if col not in df.columns:
                     df[col] = ''
             df = df[self.COLUMNAS].copy()
+            # Normalizar columnas de texto que pueden venir como NaN (float64) para
+            # evitar errores al asignar '' durante actualizaciones rápidas.
+            for col in ['hora_inicio', 'hora_fin', 'fecha_fin', 'fecha_completada', 'descripcion', 'titulo', 'repetir']:
+                if col in df.columns:
+                    df[col] = df[col].fillna('').astype(str)
             df.to_csv(self.ruta_csv, index=False)
             return df
         return pd.DataFrame(columns=self.COLUMNAS)
